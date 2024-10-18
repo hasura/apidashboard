@@ -1,0 +1,375 @@
+--
+query ConciseIntrospectionQuery {
+  __schema {
+    queryType { name }
+    mutationType { name }
+    subscriptionType { name }
+    types {
+      ...TypeInfo
+    }
+  }
+}
+
+fragment TypeInfo on __Type {
+  name
+  kind
+  description
+  fields(includeDeprecated: false) {
+    name
+    type {
+      ...TypeRef
+    }
+    args {
+      name
+      type {
+        ...TypeRef
+      }
+    }
+  }
+  inputFields {
+    name
+    type {
+      ...TypeRef
+    }
+  }
+  interfaces {
+    name
+  }
+  enumValues(includeDeprecated: false) {
+    name
+  }
+  possibleTypes {
+    name
+  }
+}
+
+fragment TypeRef on __Type {
+  kind
+  name
+  ofType {
+    kind
+    name
+    ofType {
+      kind
+      name
+    }
+  }
+}
+
+--
+This query will give you a comprehensive view of the schema, allowing you to:
+
+Understand all available types and their structures.
+See the relationships between types (through fields and interfaces).
+Identify query entry points (via the queryType).
+Understand available mutations (via the mutationType) and subscriptions (via the subscriptionType).
+Design queries based on the available fields and their arguments.
+
+
+query OptimizedIntrospectionQuery {
+  __schema {
+    queryType { name }
+    mutationType { name }
+    subscriptionType { name }
+    types {
+      ...FullType
+    }
+  }
+}
+
+fragment FullType on __Type {
+  kind
+  name
+  description
+  fields(includeDeprecated: true) {
+    name
+    description
+    args {
+      ...InputValue
+    }
+    type {
+      ...TypeRef
+    }
+    isDeprecated
+    deprecationReason
+  }
+  inputFields {
+    ...InputValue
+  }
+  interfaces {
+    ...TypeRef
+  }
+  enumValues(includeDeprecated: true) {
+    name
+    description
+    isDeprecated
+    deprecationReason
+  }
+  possibleTypes {
+    ...TypeRef
+  }
+}
+
+fragment InputValue on __InputValue {
+  name
+  description
+  type { ...TypeRef }
+  defaultValue
+}
+
+fragment TypeRef on __Type {
+  kind
+  name
+  ofType {
+    kind
+    name
+    ofType {
+      kind
+      name
+      ofType {
+        kind
+        name
+      }
+    }
+  }
+}
+
+
+-------
+First Query:
+This query focuses on retrieving detailed information about all types in the schema. It includes:
+
+
+All types (name, kind, description)
+Fields of objects, interfaces, and input objects (including arguments)
+Interface implementations
+Union members
+Enum values
+Input object fields
+
+It uses a TypeRef fragment to handle nested types up to 3 levels deep.
+
+{
+  __schema {
+    types {
+      name
+      kind
+      description
+      # Fields of objects, interfaces, and input objects
+      fields {
+        name
+        description
+        type {
+          ...TypeRef
+        }
+        # Arguments to fields
+        args {
+          name
+          description
+          type {
+            ...TypeRef
+          }
+        }
+      }
+      # Interface implementations
+      interfaces {
+        ...TypeRef
+      }
+      # Union members
+      possibleTypes {
+        ...TypeRef
+      }
+      # Enum values
+      enumValues {
+        name
+        description
+      }
+      # Input object fields
+      inputFields {
+        name
+        description
+        type {
+          ...TypeRef
+        }
+      }
+    }
+  }
+}
+
+fragment TypeRef on __Type {
+  name
+  kind
+  ofType {
+    name
+    kind
+    ofType {
+      name
+      kind
+      ofType {
+        name
+        kind
+      }
+    }
+  }
+}
+
+-----
+Second Query (IntrospectionQuery):
+This is a more comprehensive query that retrieves information about the entire schema. It includes:
+
+
+Query, mutation, and subscription types
+All types (using the FullType fragment)
+Directives (name, description, locations, and arguments)
+
+The FullType fragment is more detailed than the first query, including:
+
+Deprecated fields and enum values
+Input fields
+A more extensive TypeRef fragment (up to 7 levels deep)
+
+query IntrospectionQuery {
+  __schema {
+    queryType { name }
+    mutationType { name }
+    subscriptionType { name }
+    types {
+      ...FullType
+    }
+    directives {
+      name
+      description
+      locations
+      args {
+        ...InputValue
+      }
+    }
+  }
+}
+
+fragment FullType on __Type {
+  kind
+  name
+  description
+  fields(includeDeprecated: true) {
+    name
+    description
+    args {
+      ...InputValue
+    }
+    type {
+      ...TypeRef
+    }
+    isDeprecated
+    deprecationReason
+  }
+  inputFields {
+    ...InputValue
+  }
+  interfaces {
+    ...TypeRef
+  }
+  enumValues(includeDeprecated: true) {
+    name
+    description
+    isDeprecated
+    deprecationReason
+  }
+  possibleTypes {
+    ...TypeRef
+  }
+}
+
+fragment InputValue on __InputValue {
+  name
+  description
+  type { ...TypeRef }
+  defaultValue
+}
+
+fragment TypeRef on __Type {
+  kind
+  name
+  ofType {
+    kind
+    name
+    ofType {
+      kind
+      name
+      ofType {
+        kind
+        name
+        ofType {
+          kind
+          name
+          ofType {
+            kind
+            name
+            ofType {
+              kind
+              name
+              ofType {
+                kind
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+---
+
+Third Query:
+This query is focused specifically on the queryType of the schema. It retrieves:
+
+
+Name of the query type
+Detailed information about its fields, including:
+
+Name and description
+Arguments (name, description, type, default value)
+Return type
+Deprecation status
+
+{
+  __schema {
+    queryType {
+      name
+      fields {
+        name
+        description
+        args {
+          name
+          description
+          type {
+            name
+            kind
+            ofType {
+              name
+              kind
+            }
+          }
+          defaultValue
+        }
+        type {
+          name
+          kind
+          ofType {
+            name
+            kind
+            ofType {
+              name
+              kind
+            }
+          }
+        }
+        isDeprecated
+        deprecationReason
+      }
+    }
+  }
+}
